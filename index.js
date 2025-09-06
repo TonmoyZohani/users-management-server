@@ -32,7 +32,7 @@ async function run() {
       res.send(users);
     });
 
-    // POST: get a single user
+    // GET: get a single user
     app.get("/users/:id", async (req, res) => {
       const id = req.params.id;
 
@@ -41,11 +41,36 @@ async function run() {
       res.send(result);
     });
 
+    // PUT: get a single user
+    app.put("/users/:id", async (req, res) => {
+      const id = req.params.id;
+      const user = req.body;
+
+      console.log("Id", id);
+      console.log("User", user);
+
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+
+      const updatedUser = {
+        $set: {
+          name: user.name,
+          email: user.email,
+        },
+      };
+
+      const result = await userCollection.updateOne(
+        filter,
+        updatedUser,
+        options
+      );
+      res.send(result);
+    });
+
     // POST: add user
     app.post("/users", async (req, res) => {
       try {
         const user = req.body;
-        console.log("User", user);
         const result = await userCollection.insertOne(user);
         res.send(result);
       } catch (err) {
@@ -57,7 +82,6 @@ async function run() {
     // POST: delete user
     app.delete("/users/:id", async (req, res) => {
       const id = req.params.id;
-      console.log(`Please delete from database id ${id}`);
 
       const query = { _id: new ObjectId(id) };
       const result = await userCollection.deleteOne(query);
@@ -72,15 +96,6 @@ async function run() {
   }
 }
 run().catch(console.dir);
-
-// app.get("/", (req, res) => {
-//   res.send(`Users management server is running`);
-// });
-
-// app.get("/users", (req, res) => {
-//   console.log("Users", users);
-//   res.send(users);
-// });
 
 app.listen(port, () => {
   console.log(`Server is running port ${port}`);
