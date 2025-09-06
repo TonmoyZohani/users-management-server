@@ -8,12 +8,6 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-const users = [
-  { id: 1, name: "Alice Johnson", email: "alice.johnson@example.com" },
-  { id: 2, name: "Bob Smith", email: "bob.smith@example.com" },
-  { id: 3, name: "Charlie Brown", email: "charlie.brown@example.com" },
-];
-
 const uri =
   "mongodb+srv://zohani0804:asem0804@cluster0.d9m08dj.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 
@@ -32,6 +26,12 @@ async function run() {
     const database = client.db("userDB");
     const userCollection = database.collection("users");
 
+    // GET: fetch users
+    app.get("/users", async (req, res) => {
+      const users = await userCollection.find().toArray();
+      res.send(users);
+    });
+
     // POST: add user
     app.post("/users", async (req, res) => {
       try {
@@ -43,6 +43,12 @@ async function run() {
         console.error(err);
         res.status(500).send({ error: "Failed to add user" });
       }
+    });
+
+    // POST: delete user
+    app.delete("/users/:id", (req, res) => {
+      const id = req.params.id;
+      console.log(`Please delete from database id ${id}`);
     });
 
     // Ping the DB
